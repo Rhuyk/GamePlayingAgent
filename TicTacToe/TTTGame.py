@@ -2,6 +2,8 @@ from tkinter import *
 from enum import Enum
 import random
 
+from Players.Minimax import best_move
+
 
 class Piece(Enum):
     X = "X"
@@ -29,8 +31,8 @@ class TTTGame:
     'human(H), minimax(M), alpha-beta(AB), random(R)'
     'index 0 is X, 1 is O'
     currentPlayer = Piece.X
-    evaluation = 0
-    '1 = X winning, -1 = O winning'
+    evaluation = None  # 1 = X winning, -1 = O winning
+    gameOngoing = True
 
     window = Tk()
     window.title("Tic-Tac-Toe")
@@ -50,26 +52,33 @@ class TTTGame:
                 button = Button(self.frame, text="", font=('consolas', 20), width=3, height=1,
                                 command=lambda row=r, column=c: self.human_move(row, column))
                 button.grid(row=r, column=c)
-                button.config(state="disabled")
+                # button.config(state="disabled")
                 self.board.append(button)
 
         reset_button = Button(text="restart", font=('consolas', 20), command=self.new_game)
         reset_button.pack(side="top")
+
         self.next_turn()
         self.window.mainloop()
 
     def next_turn(self):
+        if not self.gameOngoing:
+            return
+
         if self.playersType[self.currentPlayer.number()] == "H":
             self.enable_buttons()
         elif self.playersType[self.currentPlayer.number()] == "M":
             self.disable_buttons()
-            self.computer_move()
+            self.minimax_move()
+            self.next_turn()
         elif self.playersType[self.currentPlayer.number()] == "AB":
             self.disable_buttons()
-            self.computer_move()
+            self.alpha_beta_move()
+            self.next_turn()
         else:
             self.disable_buttons()
-            self.computer_move()
+            self.random_move()
+            self.next_turn()
 
     def enable_buttons(self):
         for button in self.board:
@@ -82,13 +91,36 @@ class TTTGame:
     def human_move(self, row, col):
         space = row * self.cols + col
         if self.board[space]['text'] == "" and self.check_winner() is False:
-            self.board[space]['text'] = self.currentPlayer.value
+            self.make_move(space)
             self.check_move()
+            self.next_turn()
 
-    def computer_move(self):
-        space = random.choice(self.remaining_spaces())
-        self.board[space]['text'] = self.currentPlayer.value
+    def minimax_move(self):
+        if self.currentPlayer.number() == 0:
+            self.make_move(best_move(self, 5, True, True))
+        else:
+            self.make_move(best_move(self, 5, False, True))
         self.check_move()
+        self.next_turn()
+
+    def alpha_beta_move(self):
+        self.random_move()
+
+    def random_move(self):
+        space = random.choice(self.remaining_spaces())
+        self.make_move(space)
+        self.check_move()
+        self.next_turn()
+
+    def make_move(self, space):
+        self.board[space]['text'] = self.currentPlayer.value
+
+    def undo_move(self, space):
+        self.board[space]['text'] = ""
+        self.evaluation = None
+        if self.gameOngoing:
+            self.currentPlayer = self.currentPlayer.opposite()
+        self.gameOngoing = True
 
     def remaining_spaces(self):
         spaces = []
@@ -101,15 +133,19 @@ class TTTGame:
         if self.check_winner() is False:
             self.currentPlayer = self.currentPlayer.opposite()
             self.label.config(text=(self.currentPlayer.value + " turn"))
-            self.next_turn()
+            self.evaluation = None
+            self.gameOngoing = True
         elif self.check_winner() is True:
             self.label.config(text=(self.currentPlayer.value + " wins"))
-            self.evaluate_game()
+            self.evaluate_winning_game()
+            self.gameOngoing = False
         elif self.check_winner() == "Tie":
             self.label.config(text="Tie!")
+            self.evaluation = 0
+            self.gameOngoing = False
 
-    def evaluate_game(self):
-        if self.currentPlayer == "X":
+    def evaluate_winning_game(self):
+        if self.currentPlayer.value == "X":
             self.evaluation = 1
         else:
             self.evaluation = -1
@@ -117,15 +153,15 @@ class TTTGame:
     def check_winner(self):
         """Start from first column"""
         for row in range(0, self.rows * self.cols, self.cols):
-            '''Check row'''
+            '''
+            Check row
+            '''
             cond = 0
             for i in range(self.cols):
                 space = row + i
                 if self.board[space]['text'] == self.currentPlayer.value:
                     cond += 1
                     if cond == self.condition:
-                        for j in range(self.condition):
-                            self.board[space - j].config(bg="green")
                         return True
                 else:
                     cond = 0
@@ -141,8 +177,6 @@ class TTTGame:
                     cond += 1
                     r = space // self.cols
                     if cond == self.condition:
-                        for j in range(self.condition):
-                            self.board[space - j * (self.cols + 1)].config(bg="green")
                         return True
                 else:
                     cond = 0
@@ -159,8 +193,6 @@ class TTTGame:
                 if self.board[space]['text'] == self.currentPlayer.value:
                     cond += 1
                     if cond == self.condition:
-                        for j in range(self.condition):
-                            self.board[space - j * self.cols].config(bg="green")
                         return True
                 else:
                     cond = 0
@@ -176,8 +208,6 @@ class TTTGame:
                     cond += 1
                     r = space // self.cols
                     if cond == self.condition:
-                        for j in range(self.condition):
-                            self.board[space - j * (self.cols + 1)].config(bg="green")
                         return True
                 else:
                     cond = 0
@@ -194,8 +224,6 @@ class TTTGame:
                     cond += 1
                     r = space // self.cols
                     if cond == self.condition:
-                        for j in range(self.condition):
-                            self.board[space - j * (self.cols + 1)].config(bg="green")
                         return True
                 else:
                     cond = 0
@@ -214,18 +242,13 @@ class TTTGame:
                     cond += 1
                     r = space // self.cols
                     if cond == self.condition:
-                        for j in range(self.condition):
-                            self.board[space + j * (self.cols - 1)].config(bg="green")
                         return True
                 else:
                     cond = 0
                     r = None
 
         if self.empty_spaces() is False:
-            for space in range(self.rows * self.cols):
-                self.board[space].config(bg="yellow")
             return "Tie"
-
         else:
             return False
 
@@ -237,12 +260,13 @@ class TTTGame:
         return spaces != 0
 
     def new_game(self):
-        self.evaluation = 0
+        self.evaluation = None
+        self.gameOngoing = True
         self.currentPlayer = Piece.X
         self.label.config(text=self.currentPlayer.value + " turn")
         for space in range(self.rows * self.cols):
-            self.board[space].config(text="", bg="#F0F0F0")
+            self.board[space]['text'] = ""
         self.next_turn()
 
 
-ttt = TTTGame(3, 3, 3, "M", "M")
+ttt = TTTGame(3, 3, 3, "M", "H")
