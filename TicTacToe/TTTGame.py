@@ -2,7 +2,8 @@ from tkinter import *
 from enum import Enum
 import random
 
-from Players.Minimax import best_move
+from Players.AlphaBeta import best_alpha_beta
+from Players.Minimax import best_minimax
 
 
 class Piece(Enum):
@@ -97,14 +98,19 @@ class TTTGame:
 
     def minimax_move(self):
         if self.currentPlayer.number() == 0:
-            self.make_move(best_move(self, 5, True, True))
+            self.make_move(best_minimax(self, 4, True, True))
         else:
-            self.make_move(best_move(self, 5, False, True))
+            self.make_move(best_minimax(self, 4, False, True))
         self.check_move()
         self.next_turn()
 
     def alpha_beta_move(self):
-        self.random_move()
+        if self.currentPlayer.number() == 0:
+            self.make_move(best_alpha_beta(self, 4, True, False))
+        else:
+            self.make_move(best_alpha_beta(self, 4, False, False))
+        self.check_move()
+        self.next_turn()
 
     def random_move(self):
         space = random.choice(self.remaining_spaces())
@@ -269,4 +275,4 @@ class TTTGame:
         self.next_turn()
 
 
-ttt = TTTGame(3, 3, 3, "M", "H")
+ttt = TTTGame(3, 3, 3, "H", "AB")

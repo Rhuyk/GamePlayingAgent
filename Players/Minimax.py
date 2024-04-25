@@ -1,7 +1,7 @@
 import math
 
 
-def best_move(game, depth, is_maximizing, limited_tree):  # True for positive(first player)
+def best_minimax(game, depth, is_maximizing, limited_tree):  # True for positive(first player)
     if is_maximizing:
         best_score = -math.inf
         move = None
