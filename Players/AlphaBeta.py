@@ -38,10 +38,8 @@ def best_alpha_beta(game, depth, is_maximizing, limited_tree):
 
 def alpha_beta(game, depth, is_maximizing, limited_tree, alpha, beta):
     game.check_move()
-    if game.game_over:
+    if game.game_over or (limited_tree and depth == 0):
         return game.evaluation
-    if limited_tree and depth == 0:
-        return 0
 
     if is_maximizing:
         best_score = -math.inf

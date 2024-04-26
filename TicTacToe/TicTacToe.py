@@ -74,7 +74,7 @@ class TTTSetup:
 
 
 class TTTGame:
-    evaluation = None  # 1 = X winning, -1 = O winning
+    evaluation = 0  # 1 = X winning, -1 = O winning
 
     def __init__(self, rows, cols, condition, player_x, player_o):
         self.rows = rows
@@ -186,7 +186,7 @@ class TTTGame:
 
     def undo_move(self, space):
         self.board[space]['text'] = ""
-        self.evaluation = None
+        self.evaluation = 0
         if not self.game_over:
             self.currentPlayer = self.currentPlayer.opposite()
         self.game_over = False
@@ -202,7 +202,7 @@ class TTTGame:
         if self.check_winner() is False:
             self.currentPlayer = self.currentPlayer.opposite()
             self.label.config(text=(self.currentPlayer.value + " turn"))
-            self.evaluation = None
+            self.evaluation = 0
             self.game_over = False
         elif self.check_winner() is True:
             self.label.config(text=(self.currentPlayer.value + " wins"))
@@ -329,7 +329,7 @@ class TTTGame:
         return spaces != 0
 
     def new_game(self):
-        self.evaluation = None
+        self.evaluation = 0
         self.game_over = False
         self.currentPlayer = Piece.X
         self.label.config(text=self.currentPlayer.value + " turn")

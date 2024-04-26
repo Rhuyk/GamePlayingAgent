@@ -10,7 +10,7 @@ class NimGame:
         self.heaps = heap_sizes
         self.current_player = 0  # 0: player_1, 1: player_2
         self.playersType = [player_1, player_2]  # human(H), minimax(M), alpha-beta(AB), random(R)
-        self.evaluation = None  # 1 = player_1 winning, -1 = player_2 winning
+        self.evaluation = 0  # 1 = player_1 winning, -1 = player_2 winning
         self.game_over = False
 
     def display_board(self):
@@ -76,7 +76,7 @@ class NimGame:
 
     def undo_move(self, move):
         self.heaps[move[0]] += move[1]
-        self.evaluation = None
+        self.evaluation = 0
         self.game_over = False
         self.switch_player()
 
@@ -113,5 +113,5 @@ if __name__ == "__main__":
         size = int(input(f"Enter the size of heap {i + 1}: "))
         heap_sizes.append(size)
 
-    game = NimGame(num_heaps, heap_sizes, "R", "AB")
+    game = NimGame(num_heaps, heap_sizes, "R", "H")
     game.play()
