@@ -11,6 +11,7 @@ class NimGame:
         self.current_player = 0  # 0: player_1, 1: player_2
         self.playersType = [player_1, player_2]  # human(H), minimax(M), alpha-beta(AB), random(R)
         self.evaluation = None  # 1 = player_1 winning, -1 = player_2 winning
+        self.game_over = False
 
     def display_board(self):
         print("Current board:")
@@ -44,21 +45,21 @@ class NimGame:
         if self.current_player == 0:
             move = best_minimax(self, 5, True, True)
             self.make_move(move)
-            print("Remove ", move[0], " sticks from heap ", move[1] + 1)
+            print("Remove ", move[1], " sticks from heap ", move[0] + 1)
         else:
             move = best_minimax(self, 5, False, True)
             self.make_move(move)
-            print("Remove ", move[0], " sticks from heap ", move[1] + 1)
+            print("Remove ", move[1], " sticks from heap ", move[0] + 1)
 
     def alpha_beta_move(self):
         if self.current_player == 0:
             move = best_alpha_beta(self, 5, True, True)
             self.make_move(move)
-            print("Remove ", move[0], " sticks from heap ", move[1] + 1)
+            print("Remove ", move[1], " sticks from heap ", move[0] + 1)
         else:
             move = best_alpha_beta(self, 5, False, True)
             self.make_move(move)
-            print("Remove ", move[0], " sticks from heap ", move[1] + 1)
+            print("Remove ", move[1], " sticks from heap ", move[0] + 1)
 
     def random_move(self):
         while True:
@@ -76,6 +77,7 @@ class NimGame:
     def undo_move(self, move):
         self.heaps[move[0]] += move[1]
         self.evaluation = None
+        self.game_over = False
         self.switch_player()
 
     def available_moves(self):
@@ -92,19 +94,15 @@ class NimGame:
         self.switch_player()
         if all(heap == 0 for heap in self.heaps):
             self.evaluation = 2 - self.current_player * 2 - 1
-            return True
-        else:
-            return False
+            self.game_over = True
 
     def play(self):
-        self.switch_player()
-
-        while not self.check_move():
+        while not self.game_over:
             self.display_board()
             print(f"Player {self.current_player + 1}'s turn:")
             self.player_move()
+            self.check_move()
 
-        self.switch_player()
         print(f"Player {self.current_player + 1} wins!")
 
 
@@ -115,5 +113,5 @@ if __name__ == "__main__":
         size = int(input(f"Enter the size of heap {i + 1}: "))
         heap_sizes.append(size)
 
-    game = NimGame(num_heaps, heap_sizes, "M", "AB")
+    game = NimGame(num_heaps, heap_sizes, "R", "AB")
     game.play()

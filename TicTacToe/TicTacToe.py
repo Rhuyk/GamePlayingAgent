@@ -82,7 +82,7 @@ class TTTGame:
         self.condition = condition
         self.playersType = [player_x, player_o]
         self.currentPlayer = Piece.X
-        self.gameOngoing = True  # Add gameOngoing attribute
+        self.game_over = False  # Add gameOngoing attribute
 
         self.window = Tk()
         self.window.title("Tic-Tac-Toe")
@@ -126,7 +126,7 @@ class TTTGame:
         self.window.geometry(f"{width}x{height}+{x}+{y}")
 
     def next_turn(self):
-        if not self.gameOngoing:
+        if self.game_over:
             return
 
         if self.playersType[self.currentPlayer.number()] == "H":
@@ -187,9 +187,9 @@ class TTTGame:
     def undo_move(self, space):
         self.board[space]['text'] = ""
         self.evaluation = None
-        if self.gameOngoing:
+        if not self.game_over:
             self.currentPlayer = self.currentPlayer.opposite()
-        self.gameOngoing = True
+        self.game_over = False
 
     def available_moves(self):
         spaces = []
@@ -203,15 +203,15 @@ class TTTGame:
             self.currentPlayer = self.currentPlayer.opposite()
             self.label.config(text=(self.currentPlayer.value + " turn"))
             self.evaluation = None
-            self.gameOngoing = True
+            self.game_over = False
         elif self.check_winner() is True:
             self.label.config(text=(self.currentPlayer.value + " wins"))
             self.evaluate_winning_game()
-            self.gameOngoing = False
+            self.game_over = True
         elif self.check_winner() == "Tie":
             self.label.config(text="Tie!")
             self.evaluation = 0
-            self.gameOngoing = False
+            self.game_over = True
 
     def evaluate_winning_game(self):
         if self.currentPlayer.value == "X":
@@ -330,7 +330,7 @@ class TTTGame:
 
     def new_game(self):
         self.evaluation = None
-        self.gameOngoing = True
+        self.game_over = False
         self.currentPlayer = Piece.X
         self.label.config(text=self.currentPlayer.value + " turn")
         for space in range(self.rows * self.cols):

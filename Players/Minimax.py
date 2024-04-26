@@ -28,7 +28,7 @@ def best_minimax(game, depth, is_maximizing, limited_tree):  # True for positive
 
 def minimax(game, depth, is_maximizing, limited_tree):
     game.check_move()
-    if game.evaluation is not None:
+    if game.game_over:
         return game.evaluation
     if limited_tree and depth == 0:
         return 0
