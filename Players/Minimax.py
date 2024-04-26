@@ -5,7 +5,7 @@ def best_minimax(game, depth, is_maximizing, limited_tree):  # True for positive
     if is_maximizing:
         best_score = -math.inf
         move = None
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = minimax(game, depth - 1, False, limited_tree)
             game.undo_move(space)
@@ -16,7 +16,7 @@ def best_minimax(game, depth, is_maximizing, limited_tree):  # True for positive
     else:
         best_score = math.inf
         move = None
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = minimax(game, depth - 1, True, limited_tree)
             game.undo_move(space)
@@ -35,7 +35,7 @@ def minimax(game, depth, is_maximizing, limited_tree):
 
     if is_maximizing:
         best_score = -math.inf
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = minimax(game, depth - 1, False, limited_tree)
             game.undo_move(space)
@@ -44,7 +44,7 @@ def minimax(game, depth, is_maximizing, limited_tree):
 
     else:
         best_score = math.inf
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = minimax(game, depth - 1, True, limited_tree)
             game.undo_move(space)

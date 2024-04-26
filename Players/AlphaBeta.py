@@ -7,7 +7,7 @@ def best_alpha_beta(game, depth, is_maximizing, limited_tree):
         move = None
         alpha = -math.inf
         beta = math.inf
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = alpha_beta(game, depth - 1, False, limited_tree, alpha, beta)
             game.undo_move(space)
@@ -23,7 +23,7 @@ def best_alpha_beta(game, depth, is_maximizing, limited_tree):
         move = None
         alpha = -math.inf
         beta = math.inf
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = alpha_beta(game, depth - 1, True, limited_tree, alpha, beta)
             game.undo_move(space)
@@ -45,7 +45,7 @@ def alpha_beta(game, depth, is_maximizing, limited_tree, alpha, beta):
 
     if is_maximizing:
         best_score = -math.inf
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = alpha_beta(game, depth - 1, False, limited_tree, alpha, beta)
             game.undo_move(space)
@@ -57,7 +57,7 @@ def alpha_beta(game, depth, is_maximizing, limited_tree, alpha, beta):
 
     else:
         best_score = math.inf
-        for space in game.remaining_spaces():
+        for space in game.available_moves():
             game.make_move(space)
             score = alpha_beta(game, depth - 1, True, limited_tree, alpha, beta)
             game.undo_move(space)

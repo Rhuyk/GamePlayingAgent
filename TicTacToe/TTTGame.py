@@ -113,7 +113,7 @@ class TTTGame:
         self.next_turn()
 
     def random_move(self):
-        space = random.choice(self.remaining_spaces())
+        space = random.choice(self.available_moves())
         self.make_move(space)
         self.check_move()
         self.next_turn()
@@ -128,7 +128,7 @@ class TTTGame:
             self.currentPlayer = self.currentPlayer.opposite()
         self.gameOngoing = True
 
-    def remaining_spaces(self):
+    def available_moves(self):
         spaces = []
         for index in range(self.rows * self.cols):
             if self.board[index]['text'] == "":
