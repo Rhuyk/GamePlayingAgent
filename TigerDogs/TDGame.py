@@ -5,10 +5,6 @@ from Players.AlphaBeta import best_alpha_beta
 from Players.Minimax import best_minimax
 
 
-class GameState:
-    def __init__(self, dogs_locations):
-        self.dogs_locations = dogs_locations
-
 class TDGame:
     def __init__(self, player_1, player_2):
         self.current_player = 0  # 0: player_1, 1: player_2
@@ -101,11 +97,9 @@ class TDGame:
     def minimax_move(self):
         if self.current_player == 0:
             move = best_minimax(self, 5, True, True)
-            # print("tiger: ", move)
             self.make_move(move)
         else:
             move = best_minimax(self, 5, False, True)
-            # print("dog: ", move)
             self.make_move(move)
 
     def alpha_beta_move(self):
@@ -253,8 +247,6 @@ class TDGame:
         score -= (8 - len(self.board[self.tiger_location] - self.dogs_locations)) * 10
         for dog in self.dogs_locations:
             score -= len(self.board[dog] & self.dogs_locations)
-            # if dog in self.board[self.tiger_location]:
-            #     score -= 5
         self.evaluation = score
 
     def switch_player(self):
