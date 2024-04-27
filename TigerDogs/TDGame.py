@@ -100,15 +100,19 @@ class TDGame:
 
     def minimax_move(self):
         if self.current_player == 0:
-            self.make_move(best_minimax(self, 4, True, True))
+            move = best_minimax(self, 5, True, True)
+            # print("tiger: ", move)
+            self.make_move(move)
         else:
-            self.make_move(best_minimax(self, 4, False, True))
+            move = best_minimax(self, 5, False, True)
+            # print("dog: ", move)
+            self.make_move(move)
 
     def alpha_beta_move(self):
         if self.current_player == 0:
-            self.make_move(best_alpha_beta(self, 4, True, True))
+            self.make_move(best_alpha_beta(self, 6, True, True))
         else:
-            self.make_move(best_alpha_beta(self, 4, False, True))
+            self.make_move(best_alpha_beta(self, 6, False, True))
 
     def random_move(self):
         move = random.choice(self.available_moves())
@@ -116,9 +120,7 @@ class TDGame:
 
     def make_move(self, move):
         if move[0] == self.tiger_location:
-            self.previous_boards.append(GameState(self.dogs_locations))
-            print("Append: ", self.dogs_locations)
-            print("")
+            self.previous_boards.append(set(self.dogs_locations))
             self.tiger_location = move[1]
             self.check_tiger_move()
         else:
@@ -129,10 +131,7 @@ class TDGame:
     def undo_move(self, move):
         if move[1] == self.tiger_location:
             self.tiger_location = move[0]
-            print("Before Pop: ", self.dogs_locations)
-            self.dogs_locations = self.previous_boards.pop().dogs_locations
-            print("Pop: ", self.dogs_locations)
-            print("")
+            self.dogs_locations = self.previous_boards.pop()
         else:
             self.dogs_locations.remove(move[1])
             self.dogs_locations.add(move[0])
@@ -149,6 +148,7 @@ class TDGame:
             for dog in self.dogs_locations:
                 for move in self.board[dog] - {self.tiger_location} - self.dogs_locations:
                     moves.append([dog, move])
+        random.shuffle(moves)
         return moves
 
     def check_tiger_move(self):
@@ -241,8 +241,20 @@ class TDGame:
 
     def evaluate_game(self):
         score = 0
-        score += (16 - len(self.dogs_locations)) * 10
-        score -= len(self.board[self.tiger_location] - self.dogs_locations) * 3
+
+        score += (16 - len(self.dogs_locations)) * 50
+        if self.tiger_location % 2 == 0:
+            score += 5
+        if self.tiger_location in {0, 1, 2, 3, 4, 5, 9, 10, 14, 15, 19, 20, 21, 22, 23, 24}:
+            score -= 5
+        if self.tiger_location in {0, 4, 20, 24}:
+            score -= 10
+
+        score -= (8 - len(self.board[self.tiger_location] - self.dogs_locations)) * 10
+        for dog in self.dogs_locations:
+            score -= len(self.board[dog] & self.dogs_locations)
+            # if dog in self.board[self.tiger_location]:
+            #     score -= 5
         self.evaluation = score
 
     def switch_player(self):
@@ -251,10 +263,10 @@ class TDGame:
     def check_move(self):
         self.switch_player()
         if self.board[self.tiger_location] <= self.dogs_locations:
-            self.evaluation = -math.inf
+            self.evaluation = -10000
             self.game_over = True
         elif not self.dogs_locations:
-            self.evaluation = math.inf
+            self.evaluation = 10000
             self.game_over = True
 
     def play(self):
@@ -270,5 +282,5 @@ class TDGame:
 
 
 if __name__ == "__main__":
-    game = TDGame("R", "AB")
+    game = TDGame("AB", "M")
     game.play()
