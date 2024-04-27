@@ -173,5 +173,5 @@ class ConnectFour:
 
 
 if __name__ == "__main__":
-    game = ConnectFour("M", "AB")
+    game = ConnectFour("H", "AB")
     game.root.mainloop()

@@ -133,6 +133,8 @@ class TTTGame:
         for index in range(self.rows * self.cols):
             if self.board[index]['text'] == "":
                 spaces.append(index)
+
+        random.shuffle(spaces)
         return spaces
 
     def check_move(self):

@@ -14,9 +14,9 @@ class NimGameGUI:
         self.heap_sizes = []
         self.current_player = 1
         self.player_types = [None, None]  # To store player types for Player 1 and Player 2
-
+        self.game_over = False
         self.master.title("Nim Game")
-
+        self.evaluation = 0
         self.center_window()
         self.create_inputs()
 
@@ -166,7 +166,7 @@ class NimGameGUI:
 
             if move is not None:
                 heap_index, num_sticks = move  # Unpack move into heap_index and num_sticks
-                self.make_move(heap_index, num_sticks)  # Execute the move
+                self.make_move([heap_index, num_sticks])  # Execute the move
 
                 # Update the game board in the GUI after executing the move
                 self.update_board()
@@ -184,9 +184,8 @@ class NimGameGUI:
                 # Use after() method to delay execution and allow GUI update
                 self.master.after(1000, self.play_turn)  # Delay 1000 milliseconds (1 second) before next turn
 
-    def make_move(self, heap_index, num_sticks):
-        # Update the heap sizes based on the player's move
-        self.heap_sizes[heap_index] -= num_sticks
+    def make_move(self, move):
+        self.heap_sizes[move[0]] -= move[1]
         self.update_board()  # Update the GUI to reflect the new heap sizes
 
     def player_move(self, heap_index, entry):
@@ -196,7 +195,7 @@ class NimGameGUI:
                 raise ValueError("Invalid number of sticks.")
 
             # Call make_move with heap_index and num_sticks
-            self.make_move(heap_index, num_sticks)
+            self.make_move([heap_index, num_sticks])
 
             if self.check_winner():
                 messagebox.showinfo("Game Over", f"Player {3 - self.current_player} wins!")
@@ -209,37 +208,30 @@ class NimGameGUI:
             messagebox.showerror("Invalid Input", "Please enter valid number of sticks.")
 
     def minimax_move(self):
-        try:
-            # Implement AI move (Minimax)
-            # Example: random move for demonstration
-            heap_choice = random.randint(0, self.num_heaps - 1)
-            num_sticks = random.randint(1, self.heap_sizes[heap_choice])
-            return [heap_choice, num_sticks]
-        except ValueError as e:
-            messagebox.showerror("Error", str(e))
-            return None
+        if self.current_player == 0:
+            move = best_minimax(self, 5, True, True)
+            return [move[0], move[1]]
+        else:
+            move = best_minimax(self, 5, False, True)
+            return [move[0], move[1]]
 
     def alpha_beta_move(self):
-        try:
-            # Implement AI move (Alpha-Beta)
-            # Example: random move for demonstration
-            heap_choice = random.randint(0, self.num_heaps - 1)
-            num_sticks = random.randint(1, self.heap_sizes[heap_choice])
-            return [heap_choice, num_sticks]
-        except ValueError as e:
-            messagebox.showerror("Error", str(e))
-            return None
+        if self.current_player == 0:
+            move = best_alpha_beta(self, 5, True, True)
+            return [move[0], move[1]]
+        else:
+            move = best_alpha_beta(self, 5, False, True)
+            return [move[0], move[1]]
 
     def random_move(self):
-        try:
-            # Implement AI move (Random)
-            # Example: random move for demonstration
-            heap_choice = random.randint(0, self.num_heaps - 1)
-            num_sticks = random.randint(1, self.heap_sizes[heap_choice])
-            return [heap_choice, num_sticks]
-        except ValueError as e:
-            messagebox.showerror("Error", str(e))
-            return None
+        while True:
+            heap_choice = random.choice(range(self.num_heaps))
+            if self.heap_sizes[heap_choice] == 0:
+                continue
+            num_sticks = random.choice(range(self.heap_sizes[heap_choice])) + 1
+            self.make_move([heap_choice, num_sticks])
+            print("Remove ", num_sticks, " sticks from heap ", heap_choice + 1)
+            break
 
     def update_board(self):
         # Update heap labels in the GUI to reflect the current heap sizes
@@ -257,6 +249,27 @@ class NimGameGUI:
     def update_turn_label(self):
         # Update turn label to show the current player's turn
         self.turn_label.config(text=f"Player {self.current_player}'s Turn")
+
+    def undo_move(self, move):
+        self.heap_sizes[move[0]] += move[1]
+        self.evaluation = 0
+        self.game_over = False
+        self.switch_player()
+
+    def available_moves(self):
+        moves = []
+        for heap, sticks in enumerate(self.heap_sizes):
+            for i in range(sticks):
+                moves.append([heap, i + 1])
+
+        random.shuffle(moves)
+        return moves
+
+    def check_move(self):
+        self.switch_player()
+        if all(heap == 0 for heap in self.heap_sizes):
+            self.evaluation = 2 - self.current_player * 2 - 1
+            self.game_over = True
 
 
 if __name__ == "__main__":
