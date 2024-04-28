@@ -48,25 +48,6 @@ class TDGame:
 
             self.board.append(adjacent_nums)
 
-    def display_board(self):
-        print("Current board:")
-        print("-------------------------------")
-        row = 0
-        for i in range(5):
-            for j in range(5):
-                piece = j + row
-                if len(str(piece)) != 2:
-                    piece = f" {piece}"
-                if j + row == self.tiger_location:
-                    piece = " T"
-                elif j + row in self.dogs_locations:
-                    piece = " D"
-
-                print(f"| {piece}  ", end="")
-            print("|")
-            print("-------------------------------")
-            row += 5
-
     def player_move(self):
         if self.playersType[self.current_player] == "H":
             self.human_move()
@@ -265,60 +246,50 @@ class TDGame:
             self.evaluation = 10000
             self.game_over = True
 
-    def play(self):
-        while not self.game_over:
-            self.display_board()
-            print(f"Player {self.current_player + 1}'s turn:")
-            self.player_move()
-            self.check_move()
-
-        self.switch_player()
-        self.display_board()
-        print(f"Player {self.current_player + 1} wins!")
-
 
 class TigersVsDogsGUI:
     def __init__(self, master):
+        self.player_types_label = None
         self.master = master
         self.master.title("Tigers vs Dogs Game")
         self.buttons = []
 
-        # Set window dimensions
-        window_width = 450
-        window_height = 500
+        window_width = 520
+        window_height = 520
 
-        # Get screen dimensions
         screen_width = self.master.winfo_screenwidth()
         screen_height = self.master.winfo_screenheight()
 
-        # Calculate window position to center on screen
         x_position = (screen_width - window_width) // 2
         y_position = (screen_height - window_height) // 2
 
-        # Set window geometry to center on screen
         self.master.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
 
-        # Add header label
         header_label = tk.Label(self.master, text="Tigers vs Dogs", font=("Arial", 20, "bold"))
         header_label.pack(pady=20)
 
-        # Add creator label
         creator_label = tk.Label(self.master, text="Made by Feng-Min Hu and Prom Jack Sirisukha", font=("Arial", 12))
         creator_label.pack()
 
-        # Initialize game variables
         self.game = None
 
         self.player_types = ["Human (H)", "Minimax (M)", "Alpha-beta Pruning (AB)", "Random (R)"]
 
-        # Create UI elements
         self.create_input_fields()
+
+    def disable_board_buttons(self):
+        for button in self.buttons:
+            button.config(state=tk.DISABLED)
+
+    def enable_board_buttons(self):
+        for button in self.buttons:
+            button.config(state=tk.NORMAL)
 
     def create_input_fields(self):
         # Player 1 Type input field
         player1_frame = tk.Frame(self.master)
         player1_frame.pack(pady=20)
-        player1_label = tk.Label(player1_frame, text="Player 1 Type:", font=("Arial", 14))
+        player1_label = tk.Label(player1_frame, text="Player 1 (Tiger) Type:", font=("Arial", 14))
         player1_label.pack(side=tk.LEFT, padx=10)
         self.player1_var = tk.StringVar()
         player1_dropdown = ttk.Combobox(player1_frame, textvariable=self.player1_var, values=self.player_types)
@@ -328,7 +299,7 @@ class TigersVsDogsGUI:
         # Player 2 Type input field
         player2_frame = tk.Frame(self.master)
         player2_frame.pack(pady=20)
-        player2_label = tk.Label(player2_frame, text="Player 2 Type:", font=("Arial", 14))
+        player2_label = tk.Label(player2_frame, text="Player 2 (Dogs) Type:", font=("Arial", 14))
         player2_label.pack(side=tk.LEFT, padx=10)
         self.player2_var = tk.StringVar()
         player2_dropdown = ttk.Combobox(player2_frame, textvariable=self.player2_var, values=self.player_types)
@@ -346,13 +317,11 @@ class TigersVsDogsGUI:
         player1_type = self.player1_var.get()
         player2_type = self.player2_var.get()
 
-        # Determine player 1 type
         if player1_type.startswith("A"):
             player1_type_short = "AB"
         else:
             player1_type_short = player1_type[0]
 
-        # Determine player 2 type
         if player2_type.startswith("A"):
             player2_type_short = "AB"
         else:
@@ -364,18 +333,38 @@ class TigersVsDogsGUI:
 
         if player1_type_short != "H" and player2_type_short != "H":
             self.play_ai_vs_ai()
+        elif player1_type_short != "H" and player2_type_short == "H":
+            self.play_ai_vs_human()
 
     def play_ai_vs_ai(self):
+        if self.game is None or self.game.game_over:
+            self.enable_board_buttons()
+            return
+
+        self.disable_board_buttons()
+
         if not self.game.game_over:
             current_player = self.game.current_player
             self.trigger_ai_move()
-            self.update_board()
-            self.game.check_move()
-            self.check_game_over()
-            self.game.current_player = 1 - current_player  # Toggle between 0 and 1 (0 -> 1, 1 -> 0)
+            if not self.game.game_over:
+                self.update_player_turn_label()
+                self.update_board()
+                self.game.check_move()
+                self.check_game_over()
+                self.game.current_player = 1 - current_player
 
-            # Schedule the next AI move after a delay (e.g., 1000 milliseconds)
-            self.master.after(500, self.play_ai_vs_ai)
+                self.master.after(500, self.play_ai_vs_ai)
+
+    def play_ai_vs_human(self):
+        if not self.game.game_over:
+            current_player_type = self.game.playersType[self.game.current_player]
+            if current_player_type != "H":
+                self.trigger_ai_move()
+                self.update_board()
+                self.game.check_move()
+                self.check_game_over()
+
+                self.game.current_player = 1 - self.game.current_player
 
     def create_board_ui(self):
         for widget in self.master.winfo_children():
@@ -386,6 +375,10 @@ class TigersVsDogsGUI:
 
         creator_label = tk.Label(self.master, text="Made by Feng-Min Hu and Prom Jack Sirisukha", font=("Arial", 12))
         creator_label.pack()
+
+        player_types_text = f"Player 1 ({self.player1_var.get()}): vs Player 2 ({self.player2_var.get()})"
+        self.player_types_label = tk.Label(self.master, text=player_types_text, font=("Arial", 12))
+        self.player_types_label.pack()
 
         self.info_label = tk.Label(self.master, text="Player 1's turn: Move Tiger", font=("Arial", 14))
         self.info_label.pack(pady=10)
@@ -409,9 +402,12 @@ class TigersVsDogsGUI:
         self.update_board()
 
     def return_to_menu(self):
+        self.game = None
+
         for widget in self.master.winfo_children():
             widget.pack_forget()
 
+        self.enable_board_buttons()
         self.create_input_fields()
 
     def on_click(self, position):
@@ -425,7 +421,7 @@ class TigersVsDogsGUI:
 
                     if not self.game.game_over:
                         self.update_player_turn_label()  # Update player turn label
-                        if self.game.playersType[1] != "H":
+                        if self.game.playersType[1] != "H" or self.game.playersType[0] != "H":
                             self.trigger_ai_move()
 
                 else:
@@ -443,11 +439,12 @@ class TigersVsDogsGUI:
                 self.check_game_over()
 
                 if not self.game.game_over:
-                    self.update_player_turn_label()  # Update player turn label
-                    if self.game.playersType[1] != "H":
+                    self.update_player_turn_label()
+                    self.clear_button_selection(position)
+                    if self.game.playersType[1] != "H" or self.game.playersType[0] != "H":
                         self.trigger_ai_move()
+                        self.update_player_turn_label()
 
-                self.clear_button_selection(position)
             elif position == self.selected_dog:
                 self.clear_button_selection(position)
             else:
@@ -503,7 +500,7 @@ class TigersVsDogsGUI:
 
     def check_game_over(self):
         if self.game.game_over:
-            winner = "Player 1" if self.game.current_player == 1 else "Player 2"
+            winner = "Player 1: Tiger" if self.game.current_player == 1 else "Player 2: Dogs"
             messagebox.showinfo("Game Over", f"{winner} wins!")
             self.master.destroy()
 
