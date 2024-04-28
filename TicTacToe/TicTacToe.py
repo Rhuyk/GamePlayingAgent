@@ -1,7 +1,8 @@
 from tkinter import *
 from enum import Enum
 import random
-
+import tkinter
+from tkinter import TclError, messagebox
 from Players.AlphaBeta import best_alpha_beta
 from Players.Minimax import best_minimax
 
@@ -32,8 +33,8 @@ class TTTSetup:
         Label(self.window, text="Rows:").grid(row=0, column=0)
         Label(self.window, text="Columns:").grid(row=1, column=0)
         Label(self.window, text="Connect Condition:").grid(row=2, column=0)
-        Label(self.window, text="Player 1 Type (H/M/AB):").grid(row=3, column=0)
-        Label(self.window, text="Player 2 Type (H/M/AB):").grid(row=4, column=0)
+        Label(self.window, text="Player 1 Type (H/M/AB/R):").grid(row=3, column=0)
+        Label(self.window, text="Player 2 Type (H/M/AB/R):").grid(row=4, column=0)
 
         self.rows_entry = Entry(self.window)
         self.cols_entry = Entry(self.window)
@@ -69,8 +70,18 @@ class TTTSetup:
         player1_type = self.player1_entry.get().upper()
         player2_type = self.player2_entry.get().upper()
 
+        valid_player_types = ["H", "M", "AB", "R"]
+        if player1_type not in valid_player_types or player2_type not in valid_player_types:
+            messagebox.showerror("Invalid Player Type", "Please enter a valid player type (H/M/AB/R).")
+            return
+
         ttt_game = TTTGame(rows, cols, condition, player1_type, player2_type)
-        self.window.destroy()
+
+        try:
+            if self.window.winfo_exists():
+                self.window.destroy()
+        except tkinter.TclError as e:
+            pass
 
 
 class TTTGame:
