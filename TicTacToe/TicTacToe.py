@@ -99,8 +99,8 @@ class TTTGame:
         self.window.title("Tic-Tac-Toe")
 
         # Calculate button width and height based on board size
-        button_width = max(80 // cols, 114)  # Ensure minimum width for smaller boards
-        button_height = max(40 // rows, 114)  # Ensure minimum height for smaller boards
+        button_width = max(80 // cols, 80)  # Ensure minimum width for smaller boards
+        button_height = max(40 // rows, 80)  # Ensure minimum height for smaller boards
 
         self.label = Label(self.window, text=self.currentPlayer.value + " turn", font=('consolas', 40))
         self.label.pack(side="top")
