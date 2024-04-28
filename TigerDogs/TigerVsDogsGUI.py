@@ -360,10 +360,10 @@ class TigersVsDogsGUI:
             current_player_type = self.game.playersType[self.game.current_player]
             if current_player_type != "H":
                 self.trigger_ai_move()
+                self.update_player_turn_label()
                 self.update_board()
                 self.game.check_move()
                 self.check_game_over()
-
                 self.game.current_player = 1 - self.game.current_player
 
     def create_board_ui(self):
