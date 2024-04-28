@@ -72,14 +72,18 @@ class ConnectFour:
             self.next_turn()
 
     def human_move(self, event):
-        col = event.x // 50
-        for row in range(5, -1, -1):
-            if self.board[row][col] == 0:
-                self.make_move([row, col])
-                self.draw_board()
-                self.check_move()
-                self.next_turn()
-                break
+        if not self.game_over:
+            col = event.x // 50
+            try:
+                for row in range(5, -1, -1):
+                    if self.board[row][col] == 0:
+                        self.make_move([row, col])
+                        self.draw_board()
+                        self.check_move()
+                        self.next_turn()
+                        break
+            except IndexError:
+                pass
 
     def minimax_move(self):
         if self.current_player == 1:
