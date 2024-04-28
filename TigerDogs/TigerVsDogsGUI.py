@@ -423,6 +423,7 @@ class TigersVsDogsGUI:
                         self.update_player_turn_label()  # Update player turn label
                         if self.game.playersType[1] != "H" or self.game.playersType[0] != "H":
                             self.trigger_ai_move()
+                            self.update_player_turn_label()
 
                 else:
                     messagebox.showerror("Invalid Move", "Cannot move tiger to this position.")

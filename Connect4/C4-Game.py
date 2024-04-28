@@ -172,6 +172,60 @@ class ConnectFour:
         return score
 
 
+# if __name__ == "__main__":
+#     game = ConnectFour("H", "AB")
+#     game.root.mainloop()
+
+
+class ConnectFourGUI:
+    def __init__(self, master):
+        self.player1_var = None
+        self.player2_var = None
+        self.master = master
+        self.master.title("Connect Four")
+        self.player_types = ["Human (H)", "Minimax (M)", "Alpha-Beta (AB)", "Random (R)"]
+
+        self.create_player_menu("Player 1:", 0)
+        self.create_player_menu("Player 2:", 1)
+
+        start_button = tk.Button(self.master, text="Start Game", command=self.start_game)
+        start_button.grid(row=2, column=0, columnspan=2, pady=20)
+
+    def create_player_menu(self, label_text, row):
+        label = tk.Label(self.master, text=label_text, font=("Arial", 12))
+        label.grid(row=row, column=0, padx=10, pady=10, sticky="w")
+
+        var = tk.StringVar(self.master)
+        var.set(self.player_types[0])  # Set default value to Human (H)
+        player_dropdown = tk.OptionMenu(self.master, var, *self.player_types)
+        player_dropdown.grid(row=row, column=1, padx=10, pady=10, sticky="w")
+
+        return var
+
+    def start_game(self):
+        player1_type = self.player1_var.get()
+        player2_type = self.player2_var.get()
+
+        player1_short = player1_type[0]
+        player2_short = player2_type[0]
+
+        self.master.withdraw()
+
+        game = ConnectFour(player1_short, player2_short)
+        game.root.protocol("WM_DELETE_WINDOW", self.show_menu)
+
+        game.root.mainloop()
+
+    def show_menu(self):
+        self.master.deiconify()
+
+
+def main():
+    root = tk.Tk()
+    app = ConnectFourGUI(root)
+    root.mainloop()
+
+
 if __name__ == "__main__":
-    game = ConnectFour("H", "AB")
-    game.root.mainloop()
+    main()
+
