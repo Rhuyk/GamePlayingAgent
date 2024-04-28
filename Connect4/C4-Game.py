@@ -1,6 +1,6 @@
 import tkinter as tk
 import random
-
+from tkinter import ttk
 from Players.AlphaBeta import best_alpha_beta
 from Players.Minimax import best_minimax
 
@@ -16,6 +16,15 @@ class ConnectFour:
 
         self.root = tk.Tk()
         self.root.title("Connect Four")
+        window_width = 400
+        window_height = 400
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x_position = (screen_width - window_width) // 2
+        y_position = (screen_height - window_height) // 2
+
+        self.root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+
         self.canvas = tk.Canvas(self.root, width=400, height=400)
         self.canvas.pack()
         self.draw_board()
@@ -29,9 +38,11 @@ class ConnectFour:
             for col in range(7):
                 self.canvas.create_rectangle(50 * col, 50 * row, 50 * (col + 1), 50 * (row + 1), fill="blue")
                 if self.board[row][col] == 1:
-                    self.canvas.create_oval(50 * col + 5, 50 * row + 5, 50 * (col + 1) - 5, 50 * (row + 1) - 5, fill="red")
+                    self.canvas.create_oval(50 * col + 5, 50 * row + 5, 50 * (col + 1) - 5, 50 * (row + 1) - 5,
+                                            fill="red")
                 elif self.board[row][col] == 2:
-                    self.canvas.create_oval(50 * col + 5, 50 * row + 5, 50 * (col + 1) - 5, 50 * (row + 1) - 5, fill="yellow")
+                    self.canvas.create_oval(50 * col + 5, 50 * row + 5, 50 * (col + 1) - 5, 50 * (row + 1) - 5,
+                                            fill="yellow")
 
     def next_turn(self):
         if self.game_over:
@@ -176,47 +187,68 @@ class ConnectFour:
 #     game = ConnectFour("H", "AB")
 #     game.root.mainloop()
 
-
 class ConnectFourGUI:
     def __init__(self, master):
-        self.player1_var = None
-        self.player2_var = None
         self.master = master
         self.master.title("Connect Four")
-        self.player_types = ["Human (H)", "Minimax (M)", "Alpha-Beta (AB)", "Random (R)"]
 
-        self.create_player_menu("Player 1:", 0)
-        self.create_player_menu("Player 2:", 1)
+        window_width = 520
+        window_height = 520
+        screen_width = self.master.winfo_screenwidth()
+        screen_height = self.master.winfo_screenheight()
+        x_position = (screen_width - window_width) // 2
+        y_position = (screen_height - window_height) // 2
+        self.master.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+
+        header_label = tk.Label(self.master, text="Connect Four", font=("Arial", 20, "bold"))
+        header_label.pack(pady=20)
+
+        creator_label = tk.Label(self.master, text="Made by Feng-Min Hu and Prom Jack Sirisukha", font=("Arial", 12))
+        creator_label.pack()
+
+        self.player_types = ["Human (H)", "Minimax (M)", "Alpha-beta (AB)", "Random (R)"]
+
+        self.create_input_fields()
+
+    def create_input_fields(self):
+        player1_frame = tk.Frame(self.master)
+        player1_frame.pack(pady=20)
+        player1_label = tk.Label(player1_frame, text="Player 1 Type (Red):", font=("Arial", 14))
+        player1_label.pack(side=tk.LEFT, padx=10)
+        self.player1_var = tk.StringVar()
+        player1_dropdown = ttk.Combobox(player1_frame, textvariable=self.player1_var, values=self.player_types)
+        player1_dropdown.pack(side=tk.LEFT, padx=10)
+        player1_dropdown.set("Human (H)")
+
+        player2_frame = tk.Frame(self.master)
+        player2_frame.pack(pady=20)
+        player2_label = tk.Label(player2_frame, text="Player 2 Type (Yellow):", font=("Arial", 14))
+        player2_label.pack(side=tk.LEFT, padx=10)
+        self.player2_var = tk.StringVar()
+        player2_dropdown = ttk.Combobox(player2_frame, textvariable=self.player2_var, values=self.player_types)
+        player2_dropdown.pack(side=tk.LEFT, padx=10)
+        player2_dropdown.set("Human (H)")
 
         start_button = tk.Button(self.master, text="Start Game", command=self.start_game)
-        start_button.grid(row=2, column=0, columnspan=2, pady=20)
+        start_button.pack(pady=20)
 
-    def create_player_menu(self, label_text, row):
-        label = tk.Label(self.master, text=label_text, font=("Arial", 12))
-        label.grid(row=row, column=0, padx=10, pady=10, sticky="w")
-
-        var = tk.StringVar(self.master)
-        var.set(self.player_types[0])  # Set default value to Human (H)
-        player_dropdown = tk.OptionMenu(self.master, var, *self.player_types)
-        player_dropdown.grid(row=row, column=1, padx=10, pady=10, sticky="w")
-
-        return var
+        quit_button = tk.Button(self.master, text="Quit", command=self.master.destroy)
+        quit_button.pack(pady=10)
 
     def start_game(self):
-        player1_type = self.player1_var.get()
-        player2_type = self.player2_var.get()
-
-        player1_short = player1_type[0]
-        player2_short = player2_type[0]
-
+        player1_type = self.player1_var.get()[0]
+        player2_type = self.player2_var.get()[0]
         self.master.withdraw()
-
-        game = ConnectFour(player1_short, player2_short)
-        game.root.protocol("WM_DELETE_WINDOW", self.show_menu)
-
-        game.root.mainloop()
+        self.game = ConnectFour(player1_type, player2_type)
+        self.game.root.protocol("WM_DELETE_WINDOW", self.show_menu)
+        self.game.root.title("Connect Four")
+        self.game.root.mainloop()
 
     def show_menu(self):
+        if hasattr(self, 'game') and self.game:
+            self.game.root.destroy()
+            del self.game
+
         self.master.deiconify()
 
 
@@ -228,4 +260,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
