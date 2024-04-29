@@ -52,7 +52,7 @@ class NimGameGUI:
         player2_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
         self.player2_var = tk.StringVar()
-        self.player2_var.set(player1_options[0])  # Default to Human
+        self.player2_var.set(player1_options[1])  # Default to Human
         player2_dropdown = OptionMenu(input_frame, self.player2_var, *player1_options)
         player2_dropdown.grid(row=3, column=1, padx=5, pady=5)
 
@@ -195,7 +195,7 @@ class NimGameGUI:
                 self.update_board()
 
                 # Check for game end
-                if self.check_winner():
+                if self.check_winner() and not self.game_over:
                     messagebox.showinfo("Game Over", f"Player {3 - self.current_player} wins!")
                     self.master.destroy()
                     return
@@ -220,7 +220,7 @@ class NimGameGUI:
             # Call make_move with heap_index and num_sticks
             self.make_move([heap_index, num_sticks])
 
-            if self.check_winner():
+            if self.check_winner() and not self.game_over:
                 messagebox.showinfo("Game Over", f"Player {3 - self.current_player} wins!")
                 self.master.destroy()
             else:
@@ -231,7 +231,7 @@ class NimGameGUI:
             messagebox.showerror("Invalid Input", "Please enter valid number of sticks.")
 
     def minimax_move(self):
-        if self.current_player == 0:
+        if self.current_player == 1:
             move = best_minimax(self, self.search_depth, True, not self.complete_tree_search)
             return [move[0], move[1]]
         else:
@@ -239,7 +239,7 @@ class NimGameGUI:
             return [move[0], move[1]]
 
     def alpha_beta_move(self):
-        if self.current_player == 0:
+        if self.current_player == 1:
             move = best_alpha_beta(self, self.search_depth, True, not self.complete_tree_search)
             return [move[0], move[1]]
         else:
@@ -252,9 +252,7 @@ class NimGameGUI:
             if self.heap_sizes[heap_choice] == 0:
                 continue
             num_sticks = random.choice(range(self.heap_sizes[heap_choice])) + 1
-            self.make_move([heap_choice, num_sticks])
-            print("Remove ", num_sticks, " sticks from heap ", heap_choice + 1)
-            break
+            return [heap_choice, num_sticks]
 
     def update_board(self):
         # Update heap labels in the GUI to reflect the current heap sizes

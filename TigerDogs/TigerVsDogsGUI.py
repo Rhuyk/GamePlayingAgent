@@ -83,10 +83,10 @@ class TDGame:
 
     def minimax_move(self):
         if self.current_player == 0:
-            move = best_minimax(self, self.search_depth, True, False)
+            move = best_minimax(self, self.search_depth, True, True)
             self.make_move(move)
         else:
-            move = best_minimax(self, self.search_depth, False, False)
+            move = best_minimax(self, self.search_depth, False, True)
             self.make_move(move)
 
     def alpha_beta_move(self):
@@ -129,6 +129,7 @@ class TDGame:
             for dog in self.dogs_locations:
                 for move in self.board[dog] - {self.tiger_location} - self.dogs_locations:
                     moves.append([dog, move])
+
         random.shuffle(moves)
         return moves
 
@@ -370,7 +371,7 @@ class TigersVsDogsGUI:
                 self.check_game_over()
                 self.game.current_player = 1 - current_player
 
-                self.master.after(500, self.play_ai_vs_ai)
+                self.master.after(0, self.play_ai_vs_ai)
 
     def play_ai_vs_human(self):
         if not self.game.game_over:
@@ -440,7 +441,8 @@ class TigersVsDogsGUI:
                         self.update_player_turn_label()  # Update player turn label
                         if self.game.playersType[1] != "H" or self.game.playersType[0] != "H":
                             self.trigger_ai_move()
-                            self.update_player_turn_label()
+                            if not self.game.game_over:
+                                self.update_player_turn_label()
 
                 else:
                     messagebox.showerror("Invalid Move", "Cannot move tiger to this position.")

@@ -189,15 +189,11 @@ class ConnectFour:
         return score
 
 
-# if __name__ == "__main__":
-#     game = ConnectFour("H", "AB")
-#     game.root.mainloop()
-
 class ConnectFourGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Connect Four")
-        self.search_depth = 5  # Default search depth
+        self.search_depth = 5 # Default search depth
         self.complete_tree_search = False  # Default to complete tree search
         window_width = 520
         window_height = 520
