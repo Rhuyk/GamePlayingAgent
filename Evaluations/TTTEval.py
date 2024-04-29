@@ -52,12 +52,12 @@ class TTTGame:
         return self.evaluation
 
     def minimax_move(self):
-        depth = 4
+        depth = 5
         move = best_minimax(self, depth, self.currentPlayer == Piece.X, True)
         self.make_move(move)
 
     def alpha_beta_move(self):
-        depth = 4
+        depth = 5
         move = best_alpha_beta(self, depth, self.currentPlayer == Piece.X, True)
         self.make_move(move)
 
@@ -83,9 +83,9 @@ class TTTGame:
 
     def evaluate_game(self):
         winner = self.check_winner()
-        if winner == Piece.X:
+        if winner == Piece.X.number():
             self.evaluation = 0  # 'X' wins
-        elif winner == Piece.O:
+        elif winner == Piece.O.number():
             self.evaluation = 1  # 'O' wins
         else:
             if not self.empty_spaces():  # Check for draw

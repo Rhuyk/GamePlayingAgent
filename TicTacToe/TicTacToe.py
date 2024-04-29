@@ -37,7 +37,6 @@ class TTTSetup:
         Label(self.window, text="Player 2 Type (H/M/AB/R):").grid(row=4, column=0)
         Label(self.window, text="Search Depth:").grid(row=5, column=0)
         Label(self.window, text="Complete Tree Search (Yes/No):").grid(row=6, column=0)
-
         self.rows_entry = Entry(self.window)
         self.cols_entry = Entry(self.window)
         self.condition_entry = Entry(self.window)

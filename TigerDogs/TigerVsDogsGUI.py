@@ -83,10 +83,10 @@ class TDGame:
 
     def minimax_move(self):
         if self.current_player == 0:
-            move = best_minimax(self, self.search_depth, True, True)
+            move = best_minimax(self, self.search_depth, True, False)
             self.make_move(move)
         else:
-            move = best_minimax(self, self.search_depth, False, True)
+            move = best_minimax(self, self.search_depth, False, False)
             self.make_move(move)
 
     def alpha_beta_move(self):
