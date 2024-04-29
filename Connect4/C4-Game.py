@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import random
 from tkinter import ttk
 from Players.AlphaBeta import best_alpha_beta
@@ -6,14 +7,15 @@ from Players.Minimax import best_minimax
 
 
 class ConnectFour:
-    def __init__(self, player_1, player_2):
+    def __init__(self, player_1, player_2, search_depth, complete_tree_search):
         self.current_player = 1  # 1: player_1, 2: player_2
         self.playersType = [player_1, player_2]  # human(H), minimax(M), alpha-beta(AB), random(R)
         self.evaluation = 0
         self.game_over = False
         self.board = [[0] * 7 for _ in range(6)]  # 0 represents empty, 1 for player 1, 2 for player 2
         self.last_move = []
-
+        self.search_depth = search_depth
+        self.complete_tree_search = complete_tree_search
         self.root = tk.Tk()
         self.root.title("Connect Four")
         window_width = 400
@@ -87,15 +89,15 @@ class ConnectFour:
 
     def minimax_move(self):
         if self.current_player == 1:
-            self.make_move(best_minimax(self, 5, True, True))
+            self.make_move(best_minimax(self, self.search_depth, True, not self.complete_tree_search))
         else:
-            self.make_move(best_minimax(self, 5, False, True))
+            self.make_move(best_minimax(self, self.search_depth, False, not self.complete_tree_search))
 
     def alpha_beta_move(self):
         if self.current_player == 1:
-            self.make_move(best_alpha_beta(self, 7, True, True))
+            self.make_move(best_alpha_beta(self, self.search_depth, True, not self.complete_tree_search))
         else:
-            self.make_move(best_alpha_beta(self, 7, False, True))
+            self.make_move(best_alpha_beta(self, self.search_depth, False, not self.complete_tree_search))
 
     def random_move(self):
         move = random.choice(self.available_moves())
@@ -195,7 +197,8 @@ class ConnectFourGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Connect Four")
-
+        self.search_depth = 5  # Default search depth
+        self.complete_tree_search = False  # Default to complete tree search
         window_width = 520
         window_height = 520
         screen_width = self.master.winfo_screenwidth()
@@ -233,6 +236,25 @@ class ConnectFourGUI:
         player2_dropdown.pack(side=tk.LEFT, padx=10)
         player2_dropdown.set("Human (H)")
 
+        # Search Depth Entry
+        depth_frame = tk.Frame(self.master)
+        depth_frame.pack(pady=10)
+        depth_label = tk.Label(depth_frame, text="Search Depth:")
+        depth_label.pack(side=tk.LEFT, padx=10)
+        self.depth_entry = tk.Entry(depth_frame)
+        self.depth_entry.pack(side=tk.LEFT, padx=10)
+        self.depth_entry.insert(0, str(self.search_depth))
+
+        # Complete Tree Search Dropdown
+        tree_search_frame = tk.Frame(self.master)
+        tree_search_frame.pack(pady=10)
+        tree_search_label = tk.Label(tree_search_frame, text="Complete Tree Search:")
+        tree_search_label.pack(side=tk.LEFT, padx=10)
+        self.tree_search_var = tk.StringVar()
+        tree_search_dropdown = ttk.Combobox(tree_search_frame, textvariable=self.tree_search_var, values=["Yes", "No"])
+        tree_search_dropdown.pack(side=tk.LEFT, padx=10)
+        tree_search_dropdown.set("No" if not self.complete_tree_search else "Yes")
+
         start_button = tk.Button(self.master, text="Start Game", command=self.start_game)
         start_button.pack(pady=20)
 
@@ -243,7 +265,14 @@ class ConnectFourGUI:
         player1_type = self.player1_var.get()[0]
         player2_type = self.player2_var.get()[0]
         self.master.withdraw()
-        self.game = ConnectFour(player1_type, player2_type)
+        try:
+            self.search_depth = int(self.depth_entry.get())
+        except ValueError:
+            tk.messagebox.showerror("Invalid Input", "Please enter a valid search depth.")
+            return
+        self.complete_tree_search = True if self.tree_search_var.get() == "Yes" else False
+
+        self.game = ConnectFour(player1_type, player2_type, self.search_depth, self.complete_tree_search)
         self.game.root.protocol("WM_DELETE_WINDOW", self.show_menu)
         self.game.root.title("Connect Four")
         self.game.root.mainloop()

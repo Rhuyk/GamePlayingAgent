@@ -35,20 +35,26 @@ class TTTSetup:
         Label(self.window, text="Connect Condition:").grid(row=2, column=0)
         Label(self.window, text="Player 1 Type (H/M/AB/R):").grid(row=3, column=0)
         Label(self.window, text="Player 2 Type (H/M/AB/R):").grid(row=4, column=0)
+        Label(self.window, text="Search Depth:").grid(row=5, column=0)
+        Label(self.window, text="Complete Tree Search (Yes/No):").grid(row=6, column=0)
 
         self.rows_entry = Entry(self.window)
         self.cols_entry = Entry(self.window)
         self.condition_entry = Entry(self.window)
         self.player1_entry = Entry(self.window)
         self.player2_entry = Entry(self.window)
+        self.search_depth_entry = Entry(self.window)
+        self.limited_tree_entry = Entry(self.window)
 
         self.rows_entry.grid(row=0, column=1)
         self.cols_entry.grid(row=1, column=1)
         self.condition_entry.grid(row=2, column=1)
         self.player1_entry.grid(row=3, column=1)
         self.player2_entry.grid(row=4, column=1)
+        self.search_depth_entry.grid(row=5, column=1)
+        self.limited_tree_entry.grid(row=6, column=1)
 
-        Button(self.window, text="Start Game", command=self.start_game).grid(row=5, columnspan=2)
+        Button(self.window, text="Start Game", command=self.start_game).grid(row=7, columnspan=2)
         self.center_window()
         self.window.mainloop()
 
@@ -70,12 +76,22 @@ class TTTSetup:
         player1_type = self.player1_entry.get().upper()
         player2_type = self.player2_entry.get().upper()
 
+        search_depth = self.search_depth_entry.get()
+        limited_tree_str = self.limited_tree_entry.get().strip().lower()
+
         valid_player_types = ["H", "M", "AB", "R"]
         if player1_type not in valid_player_types or player2_type not in valid_player_types:
             messagebox.showerror("Invalid Player Type", "Please enter a valid player type (H/M/AB/R).")
             return
 
-        ttt_game = TTTGame(rows, cols, condition, player1_type, player2_type)
+        try:
+            search_depth = int(search_depth)
+            limited_tree = limited_tree_str == "yes"
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Search Depth must be an integer.")
+            return
+
+        ttt_game = TTTGame(rows, cols, condition, player1_type, player2_type, search_depth, limited_tree)
 
         try:
             if self.window.winfo_exists():
@@ -87,14 +103,15 @@ class TTTSetup:
 class TTTGame:
     evaluation = 0  # 1 = X winning, -1 = O winning
 
-    def __init__(self, rows, cols, condition, player_x, player_o):
+    def __init__(self, rows, cols, condition, player_x, player_o, search_depth, limited_tree):
         self.rows = rows
         self.cols = cols
         self.condition = condition
         self.playersType = [player_x, player_o]
         self.currentPlayer = Piece.X
         self.game_over = False  # Add gameOngoing attribute
-
+        self.search_depth = search_depth
+        self.limited_tree = limited_tree
         self.window = Tk()
         self.window.title("Tic-Tac-Toe")
 
@@ -172,17 +189,17 @@ class TTTGame:
 
     def minimax_move(self):
         if self.currentPlayer.number() == 0:
-            self.make_move(best_minimax(self, 4, True, True))
+            self.make_move(best_minimax(self, self.search_depth, True, not self.limited_tree))
         else:
-            self.make_move(best_minimax(self, 4, False, True))
+            self.make_move(best_minimax(self, self.search_depth, False, not self.limited_tree))
         self.check_move()
         self.next_turn()
 
     def alpha_beta_move(self):
         if self.currentPlayer.number() == 0:
-            self.make_move(best_alpha_beta(self, 4, True, False))
+            self.make_move(best_alpha_beta(self, self.search_depth, True, not self.limited_tree))
         else:
-            self.make_move(best_alpha_beta(self, 4, False, False))
+            self.make_move(best_alpha_beta(self, self.search_depth, False, not self.limited_tree))
         self.check_move()
         self.next_turn()
 

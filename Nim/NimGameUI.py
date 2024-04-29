@@ -17,6 +17,8 @@ class NimGameGUI:
         self.game_over = False
         self.master.title("Nim Game")
         self.evaluation = 0
+        self.search_depth = 5  # Default search depth
+        self.complete_tree_search = False  # Default to complete tree search
         self.center_window()
         self.create_inputs()
 
@@ -54,8 +56,25 @@ class NimGameGUI:
         player2_dropdown = OptionMenu(input_frame, self.player2_var, *player1_options)
         player2_dropdown.grid(row=3, column=1, padx=5, pady=5)
 
+        # Search depth input
+        depth_label = tk.Label(input_frame, text="Search Depth:")
+        depth_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+
+        self.depth_entry = tk.Entry(input_frame)
+        self.depth_entry.grid(row=4, column=1, padx=5, pady=5)
+        self.depth_entry.insert(0, str(self.search_depth))  # Default depth
+
+        # Complete tree search input
+        tree_search_label = tk.Label(input_frame, text="Complete Tree Search (Yes/No):")
+        tree_search_label.grid(row=5, column=0, padx=5, pady=5, sticky="w")
+
+        self.tree_search_var = tk.StringVar()
+        self.tree_search_var.set("No")  # Default to No
+        tree_search_dropdown = OptionMenu(input_frame, self.tree_search_var, "Yes", "No")
+        tree_search_dropdown.grid(row=5, column=1, padx=5, pady=5)
+
         start_button = tk.Button(input_frame, text="Start Game", command=self.start_game)
-        start_button.grid(row=4, columnspan=2, pady=10)
+        start_button.grid(row=6, columnspan=2, pady=10)
 
     def center_window(self):
         # Get screen width and height
@@ -84,6 +103,10 @@ class NimGameGUI:
 
             # Set player types based on selection
             self.set_player_types()
+
+            self.search_depth = int(self.depth_entry.get())
+
+            self.complete_tree_search = self.tree_search_var.get() == "Yes"
 
             # Hide input elements and start button
             for widget in self.master.winfo_children():
@@ -209,18 +232,18 @@ class NimGameGUI:
 
     def minimax_move(self):
         if self.current_player == 0:
-            move = best_minimax(self, 5, True, True)
+            move = best_minimax(self, self.search_depth, True, not self.complete_tree_search)
             return [move[0], move[1]]
         else:
-            move = best_minimax(self, 5, False, True)
+            move = best_minimax(self, self.search_depth, False, not self.complete_tree_search)
             return [move[0], move[1]]
 
     def alpha_beta_move(self):
         if self.current_player == 0:
-            move = best_alpha_beta(self, 5, True, True)
+            move = best_alpha_beta(self, self.search_depth, True, not self.complete_tree_search)
             return [move[0], move[1]]
         else:
-            move = best_alpha_beta(self, 5, False, True)
+            move = best_alpha_beta(self, self.search_depth, False, not self.complete_tree_search)
             return [move[0], move[1]]
 
     def random_move(self):

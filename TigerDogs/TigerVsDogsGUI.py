@@ -10,7 +10,7 @@ from Players.Minimax import best_minimax
 
 
 class TDGame:
-    def __init__(self, player_1, player_2):
+    def __init__(self, player_1, player_2, search_depth):
         self.current_player = 0  # 0: player_1, 1: player_2
         self.playersType = [player_1, player_2]  # human(H), minimax(M), alpha-beta(AB), random(R)
         self.evaluation = 0
@@ -48,6 +48,8 @@ class TDGame:
 
             self.board.append(adjacent_nums)
 
+        self.search_depth = search_depth
+
     def player_move(self):
         if self.playersType[self.current_player] == "H":
             self.human_move()
@@ -81,17 +83,17 @@ class TDGame:
 
     def minimax_move(self):
         if self.current_player == 0:
-            move = best_minimax(self, 5, True, True)
+            move = best_minimax(self, self.search_depth, True, True)
             self.make_move(move)
         else:
-            move = best_minimax(self, 5, False, True)
+            move = best_minimax(self, self.search_depth, False, True)
             self.make_move(move)
 
     def alpha_beta_move(self):
         if self.current_player == 0:
-            self.make_move(best_alpha_beta(self, 6, True, True))
+            self.make_move(best_alpha_beta(self, self.search_depth, True, True))
         else:
-            self.make_move(best_alpha_beta(self, 6, False, True))
+            self.make_move(best_alpha_beta(self, self.search_depth, False, True))
 
     def random_move(self):
         move = random.choice(self.available_moves())
@@ -253,7 +255,7 @@ class TigersVsDogsGUI:
         self.master = master
         self.master.title("Tigers vs Dogs Game")
         self.buttons = []
-
+        self.search_depth = 5  # Default search depth
         window_width = 520
         window_height = 520
 
@@ -306,6 +308,15 @@ class TigersVsDogsGUI:
         player2_dropdown.pack(side=tk.LEFT, padx=10)
         player2_dropdown.set("Human (H)")
 
+        # Search Depth Entry
+        depth_frame = tk.Frame(self.master)
+        depth_frame.pack(pady=10)
+        depth_label = tk.Label(depth_frame, text="Search Depth:")
+        depth_label.pack(side=tk.LEFT, padx=10)
+        self.depth_entry = tk.Entry(depth_frame)
+        self.depth_entry.pack(side=tk.LEFT, padx=10)
+        self.depth_entry.insert(0, str(self.search_depth))
+
         # Start Game button
         start_button = tk.Button(self.master, text="Start Game", command=self.start_game)
         start_button.pack(pady=20)
@@ -317,6 +328,12 @@ class TigersVsDogsGUI:
         player1_type = self.player1_var.get()
         player2_type = self.player2_var.get()
 
+        try:
+            self.search_depth = int(self.depth_entry.get())
+        except ValueError:
+            tk.messagebox.showerror("Invalid Input", "Please enter a valid search depth.")
+            return
+
         if player1_type.startswith("A"):
             player1_type_short = "AB"
         else:
@@ -327,7 +344,7 @@ class TigersVsDogsGUI:
         else:
             player2_type_short = player2_type[0]
 
-        self.game = TDGame(player1_type_short, player2_type_short)
+        self.game = TDGame(player1_type_short, player2_type_short, self.search_depth)
 
         self.create_board_ui()
 

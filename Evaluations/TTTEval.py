@@ -40,7 +40,6 @@ class TTTGame:
         self.board = [{'text': ""} for _ in range(self.rows * self.cols)]
         while not self.game_over:
             if self.playersType[self.currentPlayer.number()] == "H":
-                # Handle human player input here (if needed)
                 pass
             elif self.playersType[self.currentPlayer.number()] == "M":
                 self.minimax_move()
